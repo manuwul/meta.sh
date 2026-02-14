@@ -3,14 +3,15 @@
 META_LANG="python -c"
 INPUT_FILE="main.c"
 OUTPUT_FILE="gen_main.c"
+DELIMITER='`'
 
-exec 3<>"$INPUT_FILE"
-exec 4<>"$OUTPUT_FILE"
-
-while getopts 'm:i:o:h' OPTION; do
+while getopts 'm:d:i:o:h' OPTION; do
 	case "$OPTION" in
 		m)
 			META_LANG="$OPTARG"
+			;;
+		d)
+			DELIMITER="$OPTARG"
 			;;
 		i)
 			INPUT_FILE="$OPTARG"
@@ -21,9 +22,10 @@ while getopts 'm:i:o:h' OPTION; do
 		h | ?)
 			echo "script usage: $(basename $0) [-m metalang] [-o output] input_file"
 			echo -e "-m\\tSet metalanguage execution command. Default: python -c"
+			echo -e "-d\\tSet quotes character around metacode block. Default: \`"
 			echo -e "-i\\tSet input file. Default: main.c"
 			echo -e "-o\\tSet output file. Default: gen_main.c"
-			echo "Example: $(basename $0) -m \"python -c\" -o gen_main.c main.c"
+			echo "Example: $(basename $0) -m \"python -c\" -d '\`' -o gen_main.c main.c"
 			exit 1
 			;;
 	esac
@@ -35,25 +37,24 @@ if [ ! -f "$INPUT_FILE" ]; then
     exit 1	
 fi
 
-bt_found=0 
-meta=""
-while read -u 3 -rN1 char; do
-	if (( $bt_found == 0 )) then
-		if [[ "$char" == '`' ]]; then
-			bt_found=1
-		else
-			echo -nE "$char" >&4
-		fi
+echo "" > "$OUTPUT_FILE"
+content=$(<"$INPUT_FILE")
+metablock=0
+while [[ "$content" == *"$DELIMITER"* ]]; do
+	content="${content#"$DELIMITER"}"
+	part="${content%%"$DELIMITER"*}"
+	if (( $metablock )); then
+		res=$($META_LANG "$part")
+		echo -n "$res" >> "$OUTPUT_FILE"
 	else
-		if [[ "$char" == '`' ]]; then
-			res=$($META_LANG "$meta")
-			echo -nE "$res" >&4
-			bt_found=0
-			meta=""
-		else
-			meta+="$char"
-		fi
+		echo -n "$part" >> "$OUTPUT_FILE"
 	fi
+	content="${content#*"$DELIMITER"}"
+	metablock=$(( 1 - $metablock ))
 done
-
-exec 3<&-
+if (( $metablock )); then
+	res=$($META_LANG "$content")
+	echo -n "$res" >> "$OUTPUT_FILE"
+else
+	echo -n "$content" >> "$OUTPUT_FILE"
+fi
