@@ -17,6 +17,7 @@ int main() {
 }
 ```
 
+See [examples](./examples/) to learn more.
 ## Limitations
 - Whole file loads into memory (if this is an issue for you - just buy more RAM).
 - You cannot just write `2+2`, you need to print it.
