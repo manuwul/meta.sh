@@ -7,7 +7,7 @@ main: $(GENFILE)
 	$(RC) $(GENFILE) -o main
 
 $(GENFILE): main.rs
-	$(META) -d "@" -m "$(METALANG)" -i main.rs -o $(GENFILE)
+	$(META) -p @@ -m $(METALANG) -i main.rs -o $(GENFILE)
 
 clean:
 	rm -f main $(GENFILE)

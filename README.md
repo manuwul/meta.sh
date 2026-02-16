@@ -1,6 +1,15 @@
 # Meta.sh
 Simple bash script for compile-time code evaluation
 
+# Usage
+```
+script usage: meta.sh [-m metalang] [-p paren_char] [-i input_file] [-o output_file]
+-m	Set metalanguage execution command. Default: python
+-p	Set parenthesis character around metacode block. Default: `
+-i	Set input file. Default: main.c
+-o	Set output file. Default: gen_main.c
+Example: meta.sh -m python -p ` -i main.c -o gen_main.c
+```
 ## Example
 main.c:
 ```c

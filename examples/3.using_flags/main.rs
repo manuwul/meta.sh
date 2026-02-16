@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, @print('from' .. ' lua')@");
+    println!("Hello @@print('from' .. ' lua')@@");
 }
